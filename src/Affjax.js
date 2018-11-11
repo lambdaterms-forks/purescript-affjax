@@ -6,15 +6,22 @@
 
 exports._ajax = function () {
   var platformSpecific = { };
-  if (typeof module !== "undefined" && module.require && !(typeof process !== "undefined" && process.versions["electron"])) {
+  if (typeof module !== "undefined" && !(typeof process !== "undefined" && process.versions["electron"])) {
     // We are on node.js
+    // Don't ask me why it is hard to just provide proper `require` and we need all these manual calls
+    var XHR, urllib;
+    if(typeof module.require === "undefined") {
+      XHR = require("xhr2");
+      urllib = require("url");
+    } else {
+      XHR = module.require("xhr2");
+      urllib = module.require("url");
+    }
     platformSpecific.newXHR = function () {
-      var XHR = module.require("xhr2");
       return new XHR();
     };
 
     platformSpecific.fixupUrl = function (url) {
-      var urllib = module.require("url");
       var u = urllib.parse(url);
       u.protocol = u.protocol || "http:";
       u.hostname = u.hostname || "localhost";
